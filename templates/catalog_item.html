@@ -18,7 +18,7 @@
             </p>
             {% if downloaded %}
                 <div class="notification is-success" role="status">
-                    Torrent saved to the server's configured download folder.
+                    Torrent sent to rqbit.
                 </div>
             {% endif %}
             <article class="card">
@@ -35,10 +35,13 @@
                     <h2 class="title is-5 mt-5">Available torrents</h2>
                     <div class="is-flex is-flex-direction-column is-gap-3">
                         {% for torrent in movie.torrents %}
-                            <form method="post" action="{{ url_for('download_catalog_torrent', movie_id=movie.identifier, torrent_index=loop.index0, q=return_query, category=return_category, page=return_page) }}">
-                                <button class="button is-link is-light" type="submit"{% if torrent.exists %} disabled{% endif %}>
-                                    {% if torrent.exists %}Already saved: {{ torrent.label }}{% else %}Save {{ torrent.label }} to server{% endif %}
+                            <form method="post" action="{{ url_for('catalog.download_catalog_torrent', movie_id=movie.identifier, torrent_index=loop.index0, q=return_query, category=return_category, page=return_page) }}">
+                                <button class="button is-link is-light" type="submit" data-rqbit-button>
+                                    Send {{ torrent.label }} to rqbit
                                 </button>
+                                <p class="help rqbit-status" role="status" aria-live="polite"
+                                   data-rqbit-status-url="{{ torrent.status_url }}"
+                                   data-rqbit-label="Send {{ torrent.label }} to rqbit"></p>
                             </form>
                         {% endfor %}
                     </div>
@@ -47,5 +50,6 @@
         </div>
     </main>
     {% include "components/footer.html" %}
+    <script src="{{ url_for('static', filename='js/rqbit.js') }}" defer></script>
 </body>
 </html>

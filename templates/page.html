@@ -2,9 +2,83 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Search books, films, music, and more in the Internet Archive.">
+    <title>Content finder</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-
+    {% include "components/header.html" %}
+    <main class="section">
+        <div class="container is-max-fullhd">
+            <div class="mb-5">
+                <h1 class="title is-2 mb-2">Search for free content.</h1>
+                <p class="subtitle is-5">Find books, films, music, websites, and other archived material.</p>
+            </div>
+            <form id="search-form" class="field is-grouped is-align-items-flex-end is-flex-wrap-wrap">
+                <div class="control">
+                    <label class="label" for="search-source">Search source</label>
+                    <div class="select">
+                        <select id="search-source" name="source">
+                            <option value="archive" data-noun="results" data-placeholder="">Internet Archive</option>
+                            <option value="catalog" data-noun="movies" data-placeholder="Leave blank to list all movies">Public Domain Torrents</option>
+                            <option value="gutenberg" data-noun="books" data-placeholder="Leave blank to list all books">Project Gutenberg</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="control is-expanded">
+                    <label class="label" for="query">Search terms</label>
+                    <input class="input" id="query" name="q" type="search" maxlength="300">
+                </div>
+                <div class="control">
+                    <button id="search-button" class="button is-link" type="submit">Search</button>
+                </div>
+            </form>
+            <div class="columns">
+                {% include "components/sidebar.html" %}
+                <div class="column">
+            <p
+                id="status"
+                class="notification is-light"
+                role="status"
+                aria-live="polite"
+                data-empty-query="Enter a search term to search the Internet Archive."
+                data-searching="Searching {source}…"
+                data-no-results="No results found. Try different search terms."
+                data-empty-catalog="The catalog is empty."
+                data-showing="Showing {start}–{end} of {total} {noun}."
+                data-failed="Search failed."
+            >Enter a search term to get started.</p>
+            <section
+                id="results"
+                class="is-flex is-flex-direction-column is-gap-3"
+                aria-label="Search results"
+            ></section>
+            <nav id="pagination" class="is-flex is-justify-content-center is-align-items-center is-gap-3 mt-5" aria-label="Search result pages" hidden>
+                <button id="previous-page" class="button is-link is-light" type="button">Previous</button>
+                <span id="page-count" class="has-text-weight-semibold" data-label="Page {page} of {total}"></span>
+                <button id="next-page" class="button is-link is-light" type="button">Next</button>
+            </nav>
+            <template id="result-template">
+                <article class="card">
+                    <div class="card-content">
+                        <h2 class="title is-5 mb-2"><a class="result-link"></a></h2>
+                        <p class="result-metadata subtitle is-7 has-text-grey mb-2" data-separator=" · " data-list-separator=", " hidden></p>
+                        <div class="result-topics tags mt-3" aria-label="Topics" hidden></div>
+                        <p class="result-torrents content result-description mb-0" data-one="{count} torrent option" data-many="{count} torrent options" hidden></p>
+                        <div class="result-summary content result-description mb-0" hidden></div>
+                    </div>
+                </article>
+            </template>
+            <template id="result-tag-template">
+                <span class="tag is-link is-light"></span>
+            </template>
+                </div>
+            </div>
+        </div>
+    </main>
+    {% include "components/footer.html" %}
+    <script src="{{ url_for('static', filename='js/search.js') }}" defer></script>
 </body>
 </html>
