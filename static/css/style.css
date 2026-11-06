@@ -1,0 +1,36 @@
+[hidden] {
+    display: none !important;
+}
+
+.tag-chip-name {
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.tag-chip,
+.result-topics .tag {
+    height: auto;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.item-downloads td:first-child {
+    overflow-wrap: anywhere;
+}
+
+.columns > .column {
+    min-width: 0;
+}
+
+.result-description {
+    overflow-wrap: anywhere;
+}
+
+.item-description {
+    white-space: pre-line;
+}
+
+.item-thumbnail img {
+    object-fit: contain;
+}

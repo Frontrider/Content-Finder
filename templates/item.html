@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ description[:160] }}">
+    <title>{{ title }} - Internet Archive Search</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include "components/header.html" %}
+    <main class="section">
+        <div class="container is-max-desktop">
+            <p class="mb-5"><a href="{{ search_url }}">&larr; Back to search</a></p>
+            {% if downloaded %}
+                <div class="notification is-success" role="status">
+                    Torrent sent to rqbit.
+                </div>
+            {% endif %}
+            <article class="card">
+                {% if image_url %}
+                <div class="card-image">
+                    <figure class="image is-3by1 item-thumbnail">
+                        <img
+                            src="{{ image_url }}"
+                            alt="Cover image for {{ title }}"
+                            onerror="this.closest('.card-image').hidden = true"
+                        >
+                    </figure>
+                </div>
+                {% endif %}
+                <div class="card-content">
+                    <h1 class="title is-2">{{ title }}</h1>
+                    <p class="subtitle is-6">
+                        {% if mediatype %}{{ mediatype }}{% endif %}
+                        {% if mediatype and year %} · {% endif %}
+                        {% if year %}{{ year }}{% endif %}
+                    </p>
+                    {% if categories %}
+                        <h2 class="title is-6 mb-2">Categories / collections</h2>
+                        <div class="tags" aria-label="Categories and collections">
+                            {% for category in categories %}
+                                <span class="tag is-link is-light">{{ category }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if topics %}
+                        <h2 class="title is-6 mb-2">Topics</h2>
+                        <div class="tags" aria-label="Topics">
+                            {% for topic in topics %}
+                                <span class="tag is-info is-light">{{ topic }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if languages %}
+                        <h2 class="title is-6 mb-2">Language</h2>
+                        <div class="tags" aria-label="Languages">
+                            {% for language in languages %}
+                                <span class="tag is-success is-light">{{ language }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if torrents %}
+                        <h2 class="title is-5 mt-5">Available torrents</h2>
+                        <div class="is-flex is-flex-direction-column is-gap-3">
+                            {% for torrent in torrents %}
+                                <form method="post" action="{{ torrent.action }}">
+                                    <button class="button is-link" type="submit" data-rqbit-button>
+                                        {{ torrent.label }}
+                                    </button>
+                                    <p class="help rqbit-status" role="status" aria-live="polite"
+                                       data-rqbit-status-url="{{ torrent.status_url }}"
+                                       data-rqbit-label="{{ torrent.label }}"></p>
+                                </form>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="has-text-grey">No public torrent is available for this item.</p>
+                    {% endif %}
+                    {% if downloads %}
+                        <h2 class="title is-5 mt-5">Downloads</h2>
+                        <div class="table-container">
+                            <table
+                                class="table is-fullwidth is-narrow is-hoverable item-downloads"
+                                data-files-url="{{ url_for('archive.file_status', identifier=identifier) }}"
+                                data-progress="{done} of {total}"
+                                data-progress-unknown="{done} downloaded"
+                                data-saved="Saved to server."
+                                data-saved-label="Saved"
+                                data-failed="Save failed: {error}"
+                                data-request-failed="Unable to start saving this file."
+                            >
+                                <thead>
+                                    <tr>
+                                        <th>File</th>
+                                        <th>Format</th>
+                                        <th class="has-text-right">Size</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for download in downloads %}
+                                        <tr data-name="{{ download.name }}">
+                                            <td>
+                                                {% if download.is_torrent %}<span class="tag is-link mr-2">Torrent</span>{% endif %}
+                                                <a href="{{ download.url }}" rel="noopener">{{ download.name }}</a>
+                                                <progress class="progress is-small is-link mt-2 mb-0 file-progress" hidden></progress>
+                                                <p class="help file-status" role="status" aria-live="polite"></p>
+                                                {% if download.is_torrent %}
+                                                    <p class="help rqbit-status" role="status" aria-live="polite"
+                                                       data-rqbit-status-url="{{ url_for('rqbit_torrent_status', source='archive_file', identifier=identifier, key='file:' ~ download.name) }}"
+                                                       data-rqbit-label="Send to rqbit"></p>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ download.format }}</td>
+                                            <td class="has-text-right">{{ download.size | filesizeformat if download.size is not none else "" }}</td>
+                                            <td class="has-text-right">
+                                                <button class="button is-small is-link is-light save-file{% if download.is_torrent %} rqbit-file-button{% endif %}" type="button"{% if download.saved %} disabled{% endif %}{% if download.is_torrent %} data-rqbit-button{% endif %}>
+                                                    {% if download.is_torrent %}Send to rqbit{% else %}{{ "Saved" if download.saved else "Save to server" }}{% endif %}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                    {% if description %}
+                        <div class="content item-description mt-5">{{ description_html | safe }}</div>
+                    {% else %}
+                        <p class="content has-text-grey mt-5">No description is available for this item.</p>
+                    {% endif %}
+                </div>
+            </article>
+        </div>
+    </main>
+    {% include "components/footer.html" %}
+    <script src="{{ url_for('static', filename='js/item.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/rqbit.js') }}" defer></script>
+</body>
+</html>

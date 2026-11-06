@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ movie.title }} - Public Domain Torrents</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include "components/header.html" %}
+    <main class="section">
+        <div class="container is-max-desktop">
+            <p class="mb-5">
+                <a href="{{ url_for('home', source='catalog', q=return_query, category=return_category, page=return_page) }}">
+                    &larr; Back to search
+                </a>
+            </p>
+            {% if downloaded %}
+                <div class="notification is-success" role="status">
+                    Torrent saved to the server's configured download folder.
+                </div>
+            {% endif %}
+            <article class="card">
+                <div class="card-content">
+                    <h1 class="title is-2">{{ movie.title }}</h1>
+                    <p class="subtitle is-6">Public Domain Torrents</p>
+                    {% if movie.categories %}
+                        <div class="tags">
+                            {% for category in movie.categories %}
+                                <span class="tag is-link is-light">{{ category }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <h2 class="title is-5 mt-5">Available torrents</h2>
+                    <div class="is-flex is-flex-direction-column is-gap-3">
+                        {% for torrent in movie.torrents %}
+                            <form method="post" action="{{ url_for('download_catalog_torrent', movie_id=movie.identifier, torrent_index=loop.index0, q=return_query, category=return_category, page=return_page) }}">
+                                <button class="button is-link is-light" type="submit"{% if torrent.exists %} disabled{% endif %}>
+                                    {% if torrent.exists %}Already saved: {{ torrent.label }}{% else %}Save {{ torrent.label }} to server{% endif %}
+                                </button>
+                            </form>
+                        {% endfor %}
+                    </div>
+                </div>
+            </article>
+        </div>
+    </main>
+    {% include "components/footer.html" %}
+</body>
+</html>
